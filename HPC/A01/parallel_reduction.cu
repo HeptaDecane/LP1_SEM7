@@ -88,6 +88,7 @@ void copy_int_to_float(float *dest, int *src, int size){
 }
 
 void random_ints(int *input, int size) {
+    cout<<"Input: ";
     for(int i=0; i<size; i++)  {
         input[i] = rand()%100;
         cout<<input[i]<<"  ";
