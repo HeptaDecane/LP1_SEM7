@@ -1,0 +1,12 @@
+# CLion
+*.out
+cmake-build-debug/
+*/cmake-build-debug/
+.idea/
+*/.idea/
+out/
+*/out/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
