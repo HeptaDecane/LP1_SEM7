@@ -14,15 +14,19 @@ int binary_search(int a[], int low, int high, int key) {
         if (a[mid] == key) {
             loc = mid;
             break;
-        } else {
-            #pragma omp parallel sections {
+        } 
+        else {
+            #pragma omp parallel sections 
+            {
                 //cout<<omp_get_thread_num();
-                #pragma omp section {
+                #pragma omp section 
+                {
                     if (a[mid] < key) {
                         low = mid + 1;
                     }
                 }
-                #pragma omp section {
+                #pragma omp section 
+                {
                     if (a[mid] > key) {
                         high = mid - 1;
                     }
