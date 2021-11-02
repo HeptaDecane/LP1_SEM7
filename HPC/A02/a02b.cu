@@ -1,3 +1,7 @@
+/*
+    Multiply Vector and Matrix
+*/
+
 #include<iostream>
 
 using namespace std;
