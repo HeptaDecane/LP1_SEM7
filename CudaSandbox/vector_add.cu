@@ -1,6 +1,6 @@
 #define N 10000000
 
-void vector_add(float *out, float *a, float *b, int n) {
+__global__ void vector_add(float *out, float *a, float *b, int n) {
     for(int i = 0; i < n; i++){
         out[i] = a[i] + b[i];
     }
@@ -20,5 +20,5 @@ int main(){
     }
 
     // Main function
-    vector_add(out, a, b, N);
+    vector_add<<<1,1>>>(out, a, b, N);
 }
