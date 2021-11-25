@@ -1,24 +1,82 @@
-#define N 10000000
+#include "iostream"
 
-__global__ void vector_add(float *out, float *a, float *b, int n) {
-    for(int i = 0; i < n; i++){
-        out[i] = a[i] + b[i];
-    }
+using namespace std;
+
+// Size of array
+#define N 1048576
+
+// Kernel
+__global__ void add_vectors(double *a, double *b, double *c){
+    int id = blockDim.x * blockIdx.x + threadIdx.x;
+    if(id < N) c[id] = a[id] + b[id];
 }
 
+// Main program
 int main(){
-    float *a, *b, *out;
+    // Number of bytes to allocate for N doubles
+    size_t bytes = N*sizeof(double);
 
-    // Allocate memory
-    a   = new float[N];
-    b   = new float[N];
-    out = new float[N];
+    // Allocate memory for arrays A, B, and C on host
+    double *A = new double[N];
+    double *B = new double[N];
+    double *C = new double[N];
 
-    // Initialize array
-    for(int i = 0; i < N; i++){
-        a[i] = 1.0f; b[i] = 2.0f;
+    // Allocate memory for arrays d_A, d_B, and d_C on device
+    double *d_A, *d_B, *d_C;
+    cudaMalloc(&d_A, bytes);
+    cudaMalloc(&d_B, bytes);
+    cudaMalloc(&d_C, bytes);
+
+    // Fill host arrays A and B
+    for(int i=0; i<N; i++){
+        A[i] = 1.0;
+        B[i] = 2.0;
     }
 
-    // Main function
-    vector_add<<<1,1>>>(out, a, b, N);
+    // Copy data from host arrays A and B to device arrays d_A and d_B
+    cudaMemcpy(d_A, A, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B, bytes, cudaMemcpyHostToDevice);
+
+    // Set execution configuration parameters
+    // thr_per_blk: number of CUDA threads per grid block
+    // blk_in_grid: number of blocks in grid
+    int thr_per_blk = 256;
+    int blk_in_grid = ceil( float(N) / thr_per_blk );
+
+    // Launch kernel
+    add_vectors<<< blk_in_grid, thr_per_blk >>>(d_A, d_B, d_C);
+
+    // Copy data from device array d_C to host array C
+    cudaMemcpy(C, d_C, bytes, cudaMemcpyDeviceToHost);
+
+    // Verify results
+    string status;
+    for(int i=0; i<N; i++){
+        if(C[i] != 3.0){
+            status = "ERROR";
+            break;
+        }
+    }
+    if(status.empty())
+        status = "SUCCESS";
+
+    // Free CPU memory
+    free(A);
+    free(B);
+    free(C);
+
+    // Free GPU memory
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
+
+    printf("\n---------------------------\n");
+    printf("__%s__\n",status.c_str());
+    printf("---------------------------\n");
+    printf("N                 = %d\n", N);
+    printf("Threads Per Block = %d\n", thr_per_blk);
+    printf("Blocks In Grid    = %d\n", blk_in_grid);
+    printf("---------------------------\n\n");
+
+    return 0;
 }
