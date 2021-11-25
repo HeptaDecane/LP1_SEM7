@@ -1,5 +1,4 @@
-#include<iostream>
-using namespace std;
+#include "iostream"
 
 __global__ void cuda_hello(){
     printf("Hello World from GPU!\n");
@@ -7,6 +6,7 @@ __global__ void cuda_hello(){
 
 
 int main(){
+    printf("Hello World from CPU!\n");
     cuda_hello<<<1,1>>>();
     return 0;
 }
