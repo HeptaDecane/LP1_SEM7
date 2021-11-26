@@ -1,13 +1,13 @@
 #include "iostream"
 
 __global__ void cuda_hello(){
-    printf("Hello World from GPU!\n");
+    printf("Hello from block %d, thread %d\n", blockIdx.x, threadIdx.x);
 }
 
 
 int main(){
-    printf("Hello World from CPU!\n");
-    cuda_hello<<<1,1>>>();
+    printf("Hello World!\n");
+    cuda_hello<<<4,8>>>();
     cudaDeviceSynchronize();
     return 0;
 }
