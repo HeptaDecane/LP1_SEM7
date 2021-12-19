@@ -19,7 +19,7 @@ def get_random_state():
 def step_ahead_heuristic(next_state):
     changes = []
     for i in range(length):
-        if next_state[i] == goal_state[i] and next_state[i] != current_state[i]:
+        if next_state[i] == goal_state[i] and goal_state[i] != current_state[i]:
             current_state[i] = next_state[i]
             changes.append(i)
     return changes
