@@ -1,37 +1,48 @@
-import string
-import random
+import numpy as np
 
-def score(list1,list2):
-    score_gen = 0
-    for i in range(len(list1)):
-        if list1[i] == list2[i]:
-            score_gen = score_gen+1
-    return score_gen / len(list1)
-    
-def create(clist,list1,list2):
-    for i in range(len(list1)):
-        if list1[i] == list2[i]:
-            clist[i] = list1[i]
-    return clist
-    
-def random_generator(goal):
-    randList = [random.choice(string.printable) for _ in range(len(goal))]
-    return randList
-    
-def main():
-    goal = "123 456 789"
-    goallist = [goal[i] for i in range(len(goal))]
-    clist = [' ' for i in range(len(goal))]
-    random_string = random_generator(goallist)
-    clist = create(clist,random_string,goallist)
-    score_gen = score(clist,goallist)
-    iteration = 0
-    while (score_gen < 1):
-        random_string = random_generator(goallist)
-        clist = create(clist,random_string,goallist)
-        score_gen = score(clist,goallist)
-        iteration = iteration+1
-        print(score_gen," : ",''.join(clist))
-    print("Total iterations: ",iteration)
-    
-main()
+length = int(input('length: '))
+goal_state = np.arange(1, length+1)
+current_state = np.repeat(0, length)
+best_score = 0
+
+
+def get_score(state):
+    score = np.sum(goal_state == state)
+    return score/length
+
+
+def get_random_state():
+    random_state = np.random.randint(low=1, high=length+1, size=length)
+    return random_state
+
+
+def step_ahead_heuristic(next_state):
+    changes = []
+    for i in range(length):
+        if next_state[i] == goal_state[i] and next_state[i] != current_state[i]:
+            current_state[i] = next_state[i]
+            changes.append(i)
+    return changes
+
+
+if __name__ == '__main__':
+    current_score = get_score(current_state)
+    best_score = max(current_score, best_score)
+
+    i = 0
+    while best_score < 1:
+        print('previous state:', current_state)
+        adjacent_state = get_random_state()
+        changes = step_ahead_heuristic(adjacent_state)
+        current_score = get_score(current_state)
+
+        print('adjacent state:', adjacent_state)
+        if current_score > best_score:
+            print('changes:', changes)
+            best_score = current_score
+        print('current state: ', current_state)
+        print('score: {0:.3f}\n'.format(current_score))
+
+        i += 1
+
+    print('iterations:', i)
