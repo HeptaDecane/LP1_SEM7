@@ -1,144 +1,138 @@
-goal = [['1' , '2' , '3'] , ['4' , '5' , '6'] , ['7' , '8' , '0']]
-
-def get_pos(element):
-    for row in range(len(goal)):
-        if element in goal[row]:
-            return row , goal[row].index(element)
+import numpy as np
 
 class Node:
-    def __init__(self , data , level):
-        self.data = data
-        self.level = level
-        self.fval = self.calculate_heuristic() + self.level
+    def __init__(self, state, parent=None, action=None, depth=0, heuristic_cost=0, cost=0):
+        self.state = state
+        self.parent = parent
+        self.action = action
+        self.depth = depth
+        self.heuristic_cost = heuristic_cost
+        self.cost = cost
 
-    def calculate_heuristic(self):
-        cost = 0
-        for row in range(len(self.data)):
-            for col in range(len(self.data)):
-                r , c = get_pos(self.data[row][col])
-                cost += abs(row - r) + abs(col - c)
-        return cost
+        self.up = None
+        self.down = None
+        self.left = None
+        self.right = None
 
-    def shuffle(self , x1 , y1 , x2 , y2):
-        if x2 >= 0 and x2 < len(self.data) and y2 >= 0 and y2 < len(self.data):
-            temp_puz = []
-            temp_puz = self.copy(self.data)
-            temp = temp_puz[x2][y2]
-            temp_puz[x2][y2] = temp_puz[x1][y1]
-            temp_puz[x1][y1] = temp
-            return temp_puz
-        else:
-            return None
+    def try_move_up(self):
+        blank_loc = [i[0] for i in np.where(self.state == 0)]
+        i = blank_loc[0]
+        j = blank_loc[1]
+        if i == 0:
+            return self.state
+        upper_cell = self.state[i-1, j]
+        new_sate = self.state.copy()
+        new_sate[i, j] = upper_cell
+        new_sate[i-1, j] = 0
+        return new_sate
 
-    def copy(self , root):
-        temp = []
-        for i in root:
-            t = []
-            for j in i:
-                t.append(j)
-            temp.append(t)
-        return temp
+    def try_move_down(self):
+        blank_loc = [i[0] for i in np.where(self.state == 0)]
+        i = blank_loc[0]
+        j = blank_loc[1]
+        if i == 2:
+            return self.state
+        lower_cell = self.state[i+1, j]
+        new_state = self.state.copy()
+        new_state[i, j] = lower_cell
+        new_state[i+1, j] = 0
+        return new_state
 
-    def find(self , x):
-        for i in range(0 , len(self.data)):
-            for j in range(0 , len(self.data)):
-                if self.data[i][j] == x:
-                    return i,j
+    def try_move_left(self):
+        blank_loc = [i[0] for i in np.where(self.state == 0)]
+        i = blank_loc[0]
+        j = blank_loc[1]
+        if j == 0:
+            return self.state
+        left_cell = self.state[i, j-1]
+        new_state = self.state.copy()
+        new_state[i, j] = left_cell
+        new_state[i, j-1] = 0
+        return new_state
 
-    def generate_child(self):
-        x,y = self.find('0')
-        val_list = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]]
-        children = []
-        for i in val_list:
-            child = self.shuffle(x , y , i[0] , i[1])
-            if child is not None:
-                child_node = Node(child , self.level+1)
-                children.append(child_node)
-        return children
+    def try_move_right(self):
+        blank_loc = [i[0] for i in np.where(self.state == 0)]
+        i = blank_loc[0]
+        j = blank_loc[1]
+        if j == 2:
+            return self.state
+        right_cell = self.state[i, j+1]
+        new_state = self.state.copy()
+        new_state[i, j] = right_cell
+        new_state[i, j+1] = 0
+        return new_state
 
-    def is_equal(self , state):
-        for i in range(len(self.data)):
-            for j in range(len(self.data)):
-                if self.data[i][j] != state.data[i][j]:
-                    return False
-        return True
+    @staticmethod
+    def get_heuristic_cost(current_state, goal_state):
+        cost = np.sum(current_state != goal_state) - 1
+        return max(cost, 0)
 
-    def set_min_cost(self, state):
-        self.level = min(self.level, state.level)
-        self.fval = min(self.fval, state.fval) 
+    def print_path(self):
+        node = self
+        path = []
+        while node is not None:
+            path.append(node)
+            node = node.parent
 
-    def get_cost(self):
-        return str(self.fval)
+        while path:
+            node = path.pop()
+            print('action:', node.action)
+            print(node.state)
+            print('f = {} + {} = {}\n'.format(node.depth, node.heuristic_cost, node.cost))
 
-    def print_node(self):
-        for i in self.data:
-            for j in i:
-                print(j,end=" ")
-            print("")
+    def a_star_search(self, goal_state):
+        self.heuristic_cost = Node.get_heuristic_cost(self.state, goal_state)
+        self.cost = self.depth + self.heuristic_cost
+
+        queue = [self]
+        visited = set()
+
+        while queue:
+            queue = sorted(queue, key=lambda x: x.cost)
+            current_node = queue.pop(0)
+            visited.add(tuple(current_node.state.reshape(9)))
+
+            if np.array_equal(current_node.state, goal_state):
+                current_node.print_path()
+                return True
+
+            new_state = current_node.try_move_up()
+            if tuple(new_state.reshape(9)) not in visited:
+                depth = current_node.depth+1
+                heuristic_cost = Node.get_heuristic_cost(new_state, goal_state)
+                cost = depth + heuristic_cost
+                current_node.up = Node(state=new_state, parent=current_node, action='UP', depth=depth, heuristic_cost=heuristic_cost, cost=cost)
+                queue.append(current_node.up)
+
+            new_state = current_node.try_move_down()
+            if tuple(new_state.reshape(9)) not in visited:
+                depth = current_node.depth+1
+                heuristic_cost = Node.get_heuristic_cost(new_state, goal_state)
+                cost = depth + heuristic_cost
+                current_node.down = Node(state=new_state, parent=current_node, action='DOWN', depth=depth, heuristic_cost=heuristic_cost, cost=cost)
+                queue.append(current_node.down)
+
+            new_state = current_node.try_move_left()
+            if tuple(new_state.reshape(9)) not in visited:
+                depth = current_node.depth+1
+                heuristic_cost = Node.get_heuristic_cost(new_state, goal_state)
+                cost = depth + heuristic_cost
+                current_node.left = Node(state=new_state, parent=current_node, action='LEFT', depth=depth, heuristic_cost=heuristic_cost, cost=cost)
+                queue.append(current_node.left)
+
+            new_state = current_node.try_move_right()
+            if tuple(new_state.reshape(9)) not in visited:
+                depth = current_node.depth+1
+                heuristic_cost = Node.get_heuristic_cost(new_state, goal_state)
+                cost = depth + heuristic_cost
+                current_node.right = Node(state=new_state, parent=current_node, action='RIGHT', depth=depth, heuristic_cost=heuristic_cost, cost=cost)
+                queue.append(current_node.right)
 
 
-def propogate(j , open_list , closed_list):
-    id = -1
-    for k in closed_list[j].generate_child():
-        if closed_list[j].fval < k.fval:
-            k.set_min_cost(closed_list[j])
-        for x in range(len(closed_list)):       
-            if x.is_equal(k):
-                id = x
-                break
-        if id != -1:
-            propogate(k , open_list , closed_list)
-
-def update_list(i , open_list , closed_list):
-    id = -1
-    for j in range(len(open_list)):             
-        if(i.is_equal(open_list[j])):
-            id = j
-            break
-    if id != -1:
-        open_list[j].set_min_cost(i)
-    else:
-        for j in range(len(closed_list)):      
-            if(i.is_equal(closed_list[j])):
-                id = j
-                break
-            if(id != -1):
-                if(i.fval < closed_list[j].fval):
-                    closed_list[j].set_min_cost(i)
-                    propogate(j , open_list , closed_list)
-            else:
-                open_list.append(i)             
-
-def print_list(lis):
-    for i in lis:
-        i.print_node()
-    print('\n')
-
-if __name__ == "__main__":
-    print("Enter the start state matrix : ")
-    start = []
-    for i in range(0 , 3):
-        temp = input().split(" ")
-        start.append(temp)
-    start_node = Node(start , 0)
-    open_list = []
-    closed_list = []
-    open_list.append(start_node)
-
-    while True:
-        current_state = open_list[0]
-        print("\nCurrent State : ")
-        current_state.print_node()
-
-        if current_state.calculate_heuristic() == 0:
-            print("\n\nTotal Cost of sorting = " + current_state.get_cost())
-            break
-
-        closed_list.append(open_list[0])
-        
-        del open_list[0]
-        
-        for i in current_state.generate_child():
-            update_list(i , open_list , closed_list)
-        
-        open_list.sort(key = lambda x:x.fval, reverse = False)
+if __name__ == '__main__':
+    state1 = np.array([1, 2, 3, 8, 6, 4, 7, 5, 0]).reshape(3, 3)
+    state2 = np.array([1, 3, 4, 8, 6, 2, 7, 0, 5]).reshape(3, 3)
+    state3 = np.array([2, 8, 1, 0, 4, 3, 7, 6, 5]).reshape(3, 3)
+    goal_state = np.array([1, 2, 3, 8, 0, 4, 7, 6, 5]).reshape(3, 3)
+    node = Node(state=state3)
+    node.a_star_search(goal_state)

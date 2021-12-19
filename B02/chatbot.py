@@ -1,68 +1,120 @@
+import nltk
 from nltk.chat.util import Chat, reflections
 
 pairs = [
             [
-                r"my name is(.*)",
-                ["Hello %1, how are you today?",]
+                '(hi|hello|hey|hello|greetings|whats up)',
+                ['Greetings, How can i help you?\n']
             ],
             [
-                r"what is your name?",
-                ["My name is Jarvis and I will help you with your financial queries today.",]
+                '(.*)(name is|im|i\'m|i am|call me) (.*)',
+                ["Hello %3, how are you today?\n"]
             ],
             [
-                r"where should I invest (.*)money",
-                ["Basically there are many options to invest- 1.Regional and 2.Stocks.\nIn which section would you like to invest?",]
+                '(.*)your name(.*)',
+                ["I'm Finbot, I can assist you with your financial queries.\n"]
             ],
             [
-                r"Regional(.*)",
-                ["There are many- SBI,HSBC,DB. Which bank would you like to go for?",]
+                '(.*)(where|investment|investing|options)(.*)(invest|investing|investment|options)(.*)',
+                [
+                    "There are following investment options: "
+                    "\n1. Fixed Deposits"
+                    "\n2. Mutual Funds"
+                    "\n3. Stocks"
+                    "\nwhich section would you like to explore?\n"
+                 ]
             ],
             [
-                r"SBI(.*)",
-                ["SBI offers 10 percent Interest.",]
+                '(.*)(start|help)(.*)',
+                [
+                    "For getting started there are following investment options: "
+                    "\n1. Fixed Deposits"
+                    "\n2. Mutual Funds"
+                    "\n3. Stocks"
+                    "\nwhich section would you like to explore?\n"
+                 ]
             ],
             [
-                r"DB(.*)",
-                ["DB offers 09 percent Interest.",]
+                '(.*)(FD|fd|fixed|deposit|deposits|Fixed|Deposit|Deposits)(.*)',
+                [
+                    "Following banks provide Fixed Deposits:"
+                    "\n1. SBI"
+                    "\n2. HDFC"
+                    "\n3. UBI"
+                    "\n4. Axis Bank"
+                    "\nWhich bank would you like to go for?\n"
+
+                ]
             ],
             [
-                r"HSBC(.*)",
-                ["HSBC offers 11 percent Interest.",]
+                '(.*)(SBI|sbi|state bank)(.*)',
+                ["Risk: Low\nFixed APR: 5.60\n"]
             ],
             [
-                r"(.*)Stocks(.*)",
-                ["We have 2 companies to offer: 1. AAA 2. BBB.\n choose any one to know more.\n",]
+                '(.*)(HDFC|hdfc)(.*)',
+                ["Risk: Low\nFixed APR: 6.20\n"]
             ],
             [
-                r"AAA(.*)",
-                ["The company AAA has a ROI = 10 percent",]
+                '(.*)(UBI|ubi|union bank)(.*)',
+                ["Risk: Low\nFixed APR: 5.90\n"]
             ],
             [
-                r"BBB(.*)",
-                ["The company BBB has a ROI = 12 percent",]
+                '(.*)(Axis|axis)(.*)',
+                ["Risk: Low\nFixed APR: 6.56\n"]
             ],
             [
-                r"hi|hey|hello(.*)",
-                ["Hello", "Hey there",]
+                '(.*)(mutual funds|Mutual Funds)(.*)',
+                [
+                    "We have following options for Mutual Funds:"
+                    "\n1. Bluechip Fund"
+                    "\n2. Small Cap"
+                    "\n3. Technology Direct"
+                    "\nWhich one would you explore?\n"
+                ]
             ],
             [
-                r"quit",
-                ["Signing out, hope to see you again!",]
+                '(.*)(Bluechip|bluechip)(.*)',
+                ["Provider: Axis Bank\nRisk: Moderate\nAverage APR: 20.16\n"]
             ],
             [
-                r"no",
-                ["Okay, glad I could help. Signing out, hope to see you again!",]
+                '(.*)(Small Cap|small cap)(.*)',
+                ["Provider: Nippon India\nRisk: High\nAverage APR: 29.31\n"]
+
             ],
             [
-                r"okay",
-                ["Is there anything else you would like to know? To exit, type quit",]
+                '(.*)(Technology Direct|technology direct)(.*)',
+                ["Provider: ICICI\nRisk: High\nAverage APR: 43.08\n"]
+
             ],
+            [
+                '(.*)(Stocks|stocks)(.*)',
+                [
+                    "We have following stocks listed:"
+                    "\n1. Wipro           |    Average APR: 45.52"
+                    "\n2. Infosys         |    Average APR: 51.61"
+                    "\n3. Reliance Ind.   |    Average APR: 69.42"
+                    "\n4. Tata Motors     |    Average APR: 12.47"
+                    "\n5. IRCTC           |    Average APR: 6.64"
+                    "\nRisk: Very high\n"
+                ]
+            ],
+            [
+                '(.*)(quit|bye|exit|no)(.*)',
+                ["Signing out, hope to see you again!\n\n\n\n",]
+            ],
+            [
+                '(.*)(ok|OK|okay)(.*)',
+                ["Is there anything else you would like to know?\n",]
+            ],
+            [
+                '(.*)',
+                ["Sorry, could not comprehend\n"]
+            ]
         ]
 
-def chatbot():
-    print("Booting up...\nHey I am a simple ChatBot made without ML, only using NLTK library.\n Please type in English language (lower case) what you want to ask me.\nPress Q to exit")
-    chat = Chat(pairs, reflections)
-    chat.converse()
 
 if __name__ == "__main__":
-    chatbot()
+    print("Booting up...\n\n")
+    print("Hello! I'm Finbot, I can assist you with your financial queries.")
+    chat = Chat(pairs, reflections)
+    chat.converse()
