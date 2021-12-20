@@ -1,49 +1,42 @@
-#include<omp.h>
-#include<iostream>
+#include "bits/stdc++.h"
+#include "omp.h"
 using namespace std;
 
-void swap(int *num1, int *num2) {
-    int temp = *num1;
-    *num1 = *num2;
-    *num2 = temp;
+#define N 1024
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
 int main() {
-    int n = 10;
-    int a[size];
-    
-    omp_set_num_threads(2);
-    
-    for(int i=0; i<n; i++) {
-        a[i] = rand()% 100;
-    }
-    
-    for(int i=0; i<n; i++) 
-        cout<<"  "<<a[i];
+    int *a = new int[N];
+    for(int i=0; i < N; i++) a[i]=rand()%N;
+
+    cout<<"initial array:\n";
+    for(int i=0; i < N; i++) cout<<a[i]<<" ";
     cout<<endl;
-    
-    int i=0, j=0;
-    int first=0;
+
+    int i=0, j=0,first=0;
     double start, end;
-    
+
+    omp_set_num_threads(4);
     start = omp_get_wtime();
-    for(i=0; i<n-1; i++) {
+    for(i=0; i<N-1; i++) {
         first = i%2;
         #pragma omp parallel for
-        for(j=first; j<n-1; j++) {
+        for(j=first; j<N-1; j++) {
             if(a[j] > a[j+1])
               swap(&a[j], &a[j+1]);
         }
     }
-    
     end = omp_get_wtime();
-    cout<<"Result(parallel) : "<<endl;
-    for(i=0; i<n; i++)
-      cout<<"  "<<a[i];
+
+    cout<<"sorted array:\n";
+    for(i=0; i < N; i++) cout<<a[i]<<" ";
     cout<<endl;
-    
-    cout<<"Time parallel = "<<(end-start)<<endl;
-    
+
+    cout<<"time: "<<(end-start)<<endl;
+
     return 0;
-    
 }

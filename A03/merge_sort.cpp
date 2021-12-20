@@ -1,20 +1,14 @@
-#include<iostream>
-#include<omp.h>
-
+#include "bits/stdc++.h"
+#include "omp.h"
 using namespace std;
 
-void printArray(int *arr, int size) {
-    for(int i=0; i<size; i++) {
-         cout<<arr[i]<<"  ";
-    }
-    cout<<endl;
-}
+#define N 1024
 
 void merge(int* arr, int start, int mid, int end) {
     int len = (end - start) + 1;
     int temp[len];
     int cur = 0;
-    
+
     int i = start;
     int j = mid + 1;
     while(i <= mid && j <= end){
@@ -36,7 +30,7 @@ void merge(int* arr, int start, int mid, int end) {
             cur++;
         }
     }
-    
+
     else if(j <= end) {
         while(j <= end) {
             temp[cur] = arr[j];
@@ -44,7 +38,7 @@ void merge(int* arr, int start, int mid, int end) {
             cur++;
         }
     }
-    
+
     cur = 0;
     for(i=start; i<=end; i++) {
         arr[i] = temp[cur];
@@ -56,47 +50,40 @@ void merge(int* arr, int start, int mid, int end) {
 void mergeSort(int *arr, int start, int end) {
     if(start < end) {
         int mid = (start+end) / 2;
-        
+
         #pragma omp parallel sections
         {
             #pragma omp section
             mergeSort(arr, start, mid);
-            
+
             #pragma omp section
             mergeSort(arr, mid+1, end);
         }
-        
+
         merge(arr, start, mid, end);
-    
     }
 }
 
-int main(int argc, char *argv[]) {
-    int size = 10;
-    int a[size];
-    
-    double start, end;
-    
-    omp_set_num_threads(2);
-    
-    for(int i=0; i<size; i++) {
-        a[i] = rand()% 100;
-    }
-    
-    //int a[]= {7,33,5,5,23,111,75,34,77,121,120};
-    
-    for(int i=0; i<size; i++) 
-        cout<<"  "<<a[i];
+int main() {
+    int *a = new int[N];
+    for(int i=0; i < N; i++) a[i]=rand()%N;
+
+    cout<<"initial array:\n";
+    for(int i=0; i < N; i++) cout<<a[i]<<" ";
     cout<<endl;
+
+    double start, end;
+
+    omp_set_num_threads(4);
     start = omp_get_wtime();
-    
-    mergeSort(a, 0, size-1);
-    
-    printArray(a, size);
-    
+    mergeSort(a, 0, N-1);
     end = omp_get_wtime();
-    
+
+    cout<<"sorted array:\n";
+    for(int i=0; i < N; i++) cout<<a[i]<<" ";
+    cout<<endl;
+
     cout<<"Time parallel = "<<(end-start)<<endl;
-    
+
     return 0;
 }
