@@ -114,3 +114,7 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+// set(CMAKE_CXX_COMPILER mpicxx)
+// mpicxx binary_search_mpi.cpp
+// mpirun -np 4 ./a.out
